@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pulse — Share Your World</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0f;
+      --surface: #16161a;
+      --surface2: #1e1e24;
+      --border: #2a2a34;
+      --accent: #e8ff47;
+      --accent2: #ff6b6b;
+      --accent3: #6bffce;
+      --text: #f0f0f4;
+      --muted: #7a7a90;
+      --radius: 16px;
+      --font-head: 'Syne', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.4;
+    }
+
+    /* ── NAV ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 32px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: rgba(13,13,15,0.85);
+      backdrop-filter: blur(16px);
+      z-index: 100;
+    }
+
+    .logo {
+      font-family: var(--font-head);
+      font-weight: 800;
+      font-size: 1.5rem;
+      letter-spacing: -0.03em;
+      color: var(--accent);
+    }
+    .logo span { color: var(--text); }
+
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+
+    .btn {
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 0.875rem;
+      padding: 9px 22px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      letter-spacing: 0.01em;
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0d0d0f;
+      font-weight: 700;
+    }
+    .btn-primary:hover { background: #d4e93e; transform: translateY(-1px); }
+
+    .btn-danger {
+      background: transparent;
+      color: var(--accent2);
+      border: 1px solid var(--accent2);
+    }
+    .btn-danger:hover { background: var(--accent2); color: #fff; }
+
+    .user-chip {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 14px 6px 6px;
+      font-size: 0.85rem;
+      color: var(--text);
+    }
+    .avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent3));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.75rem; color: #0d0d0f;
+    }
+
+    /* ── SIGN-IN MODAL ── */
+    .overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(6px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .overlay.active { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 40px;
+      width: 100%;
+      max-width: 420px;
+      animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp {
+      from { opacity:0; transform: translateY(24px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+    .modal h2 {
+      font-family: var(--font-head);
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+    .modal p { color: var(--muted); font-size: 0.9rem; margin-bottom: 28px; }
+
+    .field { margin-bottom: 18px; }
+    .field label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.06em; text-transform: uppercase; }
+    .field input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .field input:focus { border-color: var(--accent); }
+
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
+
+    /* ── LAYOUT ── */
+    .page { display: flex; max-width: 1100px; margin: 0 auto; padding: 32px 24px; gap: 32px; }
+
+    /* ── SIDEBAR ── */
+    .sidebar { width: 220px; flex-shrink: 0; }
+    .sidebar-nav a {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 14px;
+      border-radius: 12px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.15s;
+      margin-bottom: 4px;
+    }
+    .sidebar-nav a:hover, .sidebar-nav a.active { background: var(--surface2); color: var(--text); }
+    .sidebar-nav a.active .icon { color: var(--accent); }
+    .icon { font-size: 1.1rem; width: 22px; text-align: center; }
+
+    /* ── FEED ── */
+    .feed { flex: 1; min-width: 0; }
+
+    /* ── COMPOSER ── */
+    .composer {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .composer-top { display: flex; gap: 14px; align-items: flex-start; }
+    .composer-avatar {
+      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--accent), var(--accent3));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.85rem; color: #0d0d0f;
+    }
+    .composer textarea {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      resize: none;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      line-height: 1.6;
+      min-height: 72px;
+      placeholder-color: var(--muted);
+    }
+    .composer textarea::placeholder { color: var(--muted); }
+
+    .composer-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .media-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+    .media-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 13px;
+      color: var(--muted);
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .media-btn:hover { color: var(--text); border-color: var(--muted); }
+
+    .char-counter { font-size: 0.8rem; color: var(--muted); margin-right: 8px; }
+
+    .btn-post {
+      background: var(--accent);
+      color: #0d0d0f;
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 0.875rem;
+      padding: 9px 22px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-post:hover { background: #d4e93e; transform: translateY(-1px); }
+    .btn-post:disabled { opacity: 0.4; cursor: default; transform: none; }
+
+    /* ── MEDIA PREVIEW ── */
+    .media-preview {
+      margin-top: 12px;
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    .preview-item {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+    }
+    .preview-item img, .preview-item video {
+      display: block; max-height: 140px; max-width: 200px; object-fit: cover;
+    }
+    .preview-item .remove-btn {
+      position: absolute; top: 4px; right: 4px;
+      background: rgba(0,0,0,0.7); color: #fff;
+      border: none; border-radius: 50%;
+      width: 22px; height: 22px;
+      cursor: pointer; font-size: 0.8rem;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .file-label {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 13px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .file-label:hover { color: var(--text); border-color: var(--muted); }
+    input[type="file"] { display: none; }
+
+    /* ── SIGN-IN GATE ── */
+    .signin-gate {
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .signin-gate p { color: var(--muted); margin-bottom: 14px; font-size: 0.95rem; }
+
+    /* ── POST CARD ── */
+    .post-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+      animation: fadeIn 0.4s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity:0; transform: translateY(10px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+
+    .post-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .post-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: linear-gradient(135deg, #ff6b6b, #ffc06b);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.8rem; color: #0d0d0f;
+      flex-shrink: 0;
+    }
+    .post-meta { flex: 1; }
+    .post-name { font-weight: 600; font-size: 0.92rem; }
+    .post-time { color: var(--muted); font-size: 0.78rem; }
+    .post-tag {
+      font-size: 0.72rem;
+      padding: 3px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .post-body { font-size: 0.95rem; line-height: 1.65; color: var(--text); margin-bottom: 12px; }
+
+    .post-media { margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 6px; }
+    .post-media img { border-radius: 10px; max-width: 100%; max-height: 300px; object-fit: cover; display: block; }
+    .post-media video { border-radius: 10px; max-width: 100%; max-height: 300px; display: block; }
+
+    .post-actions { display: flex; gap: 6px; }
+    .action-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 14px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex; align-items: center; gap: 5px;
+      font-family: var(--font-body);
+    }
+    .action-btn:hover { color: var(--text); border-color: var(--muted); }
+    .action-btn.liked { color: var(--accent2); border-color: var(--accent2); }
+    .action-btn.bookmarked { color: var(--accent); border-color: var(--accent); }
+
+    /* ── TRENDING ── */
+    .trending-panel {
+      width: 240px; flex-shrink: 0;
+    }
+    .panel-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .panel-title {
+      font-family: var(--font-head);
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 14px;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    .trend-item {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .trend-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .trend-tag { font-size: 0.85rem; font-weight: 600; color: var(--accent); }
+    .trend-count { font-size: 0.75rem; color: var(--muted); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .trending-panel { display: none; }
+    }
+    @media (max-width: 640px) {
+      .sidebar { display: none; }
+      nav { padding: 14px 18px; }
+      .page { padding: 20px 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">pulse<span>.</span></div>
+  <div class="nav-right" id="navRight">
+    <button class="btn btn-ghost" onclick="openModal('signin')">Sign In</button>
+    <button class="btn btn-primary" onclick="openModal('signup')">Join Free</button>
+  </div>
+</nav>
+
+<!-- SIGN IN MODAL -->
+<div class="overlay" id="signinOverlay">
+  <div class="modal">
+    <h2>Welcome back</h2>
+    <p>Sign in to your Pulse account.</p>
+    <div class="field"><label>Email</label><input type="email" id="signinEmail" placeholder="you@example.com"/></div>
+    <div class="field"><label>Password</label><input type="password" id="signinPass" placeholder="••••••••"/></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModals()">Cancel</button>
+      <button class="btn btn-primary" onclick="doSignIn()">Sign In</button>
+    </div>
+  </div>
+</div>
+
+<!-- SIGN UP MODAL -->
+<div class="overlay" id="signupOverlay">
+  <div class="modal">
+    <h2>Create account</h2>
+    <p>Join Pulse and start sharing your world.</p>
+    <div class="field"><label>Name</label><input type="text" id="signupName" placeholder="Your name"/></div>
+    <div class="field"><label>Email</label><input type="email" id="signupEmail" placeholder="you@example.com"/></div>
+    <div class="field"><label>Password</label><input type="password" id="signupPass" placeholder="••••••••"/></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModals()">Cancel</button>
+      <button class="btn btn-primary" onclick="doSignUp()">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="page">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <nav class="sidebar-nav">
+      <a href="#" class="active"><span class="icon">⚡</span> Feed</a>
+      <a href="#"><span class="icon">🔍</span> Explore</a>
+      <a href="#"><span class="icon">🔔</span> Notifications</a>
+      <a href="#"><span class="icon">📬</span> Messages</a>
+      <a href="#"><span class="icon">🔖</span> Saved</a>
+      <a href="#"><span class="icon">👤</span> Profile</a>
+    </nav>
+  </aside>
+
+  <!-- FEED -->
+  <main class="feed">
+
+    <!-- COMPOSER (logged out) -->
+    <div class="signin-gate" id="signinGate">
+      <p>Sign in to post, share photos, videos, and more.</p>
+      <button class="btn btn-primary" onclick="openModal('signin')">Sign In to Post</button>
+    </div>
+
+    <!-- COMPOSER (logged in) -->
+    <div class="composer" id="composer" style="display:none">
+      <div class="composer-top">
+        <div class="composer-avatar" id="compAvatar">?</div>
+        <textarea id="postText" placeholder="What's on your mind?" oninput="updateCounter()"></textarea>
+      </div>
+
+      <!-- media previews -->
+      <div class="media-preview" id="mediaPreview"></div>
+
+      <div class="composer-footer">
+        <div class="media-btns">
+          <label class="file-label" title="Add image">
+            📷 Photo
+            <input type="file" accept="image/*" multiple onchange="handleFiles(this, 'image')">
+          </label>
+          <label class="file-label" title="Add video">
+            🎬 Video
+            <input type="file" accept="video/*" onchange="handleFiles(this, 'video')">
+          </label>
+          <label class="file-label" title="Add file">
+            📎 File
+            <input type="file" onchange="handleFiles(this, 'file')">
+          </label>
+          <button class="media-btn" onclick="addEmoji()">😊 Emoji</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="char-counter" id="charCounter">280</span>
+          <button class="btn-post" id="postBtn" onclick="submitPost()">Post</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- POSTS -->
+    <div id="postsContainer"></div>
+
+  </main>
+
+  <!-- TRENDING -->
+  <aside class="trending-panel">
+    <div class="panel-card">
+      <div class="panel-title">🔥 Trending</div>
+      <div class="trend-item"><div class="trend-tag">#WebDev</div><div class="trend-count">4,821 posts</div></div>
+      <div class="trend-item"><div class="trend-tag">#Photography</div><div class="trend-count">3,102 posts</div></div>
+      <div class="trend-item"><div class="trend-tag">#AI</div><div class="trend-count">9,550 posts</div></div>
+      <div class="trend-item"><div class="trend-tag">#Music</div><div class="trend-count">2,240 posts</div></div>
+      <div class="trend-item"><div class="trend-tag">#Design</div><div class="trend-count">1,880 posts</div></div>
+    </div>
+    <div class="panel-card">
+      <div class="panel-title">👥 Suggested</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6bffce,#6b8eff);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;color:#0d0d0f;flex-shrink:0">SJ</div>
+          <div style="flex:1"><div style="font-size:.85rem;font-weight:600">Sam J.</div><div style="font-size:.75rem;color:var(--muted)">Designer</div></div>
+          <button style="font-size:.75rem;padding:4px 10px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer">Follow</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#ff6b6b,#ff9d6b);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;color:#0d0d0f;flex-shrink:0">MK</div>
+          <div style="flex:1"><div style="font-size:.85rem;font-weight:600">Maya K.</div><div style="font-size:.75rem;color:var(--muted)">Photographer</div></div>
+          <button style="font-size:.75rem;padding:4px 10px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer">Follow</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+// ── STATE ──
+let currentUser = null;
+let posts = [];
+let mediaFiles = [];
+
+// ── SEED POSTS ──
+const seedPosts = [
+  {
+    id: 1, user: "Alex Rivera", initials: "AR", avatarGrad: "linear-gradient(135deg,#6bffce,#6b8eff)",
+    time: "2h ago", text: "Just shipped a new feature 🚀 The dark mode toggle now respects your system preference automatically. Small detail, huge difference in experience.",
+    media: [], likes: 42, liked: false, bookmarked: false, tag: "🛠 Dev"
+  },
+  {
+    id: 2, user: "Priya Nair", initials: "PN", avatarGrad: "linear-gradient(135deg,#ff6b6b,#ffc06b)",
+    time: "5h ago", text: "Morning fog over the harbor. Sometimes the city feels completely different before 7am. Caught this on my walk today 📷",
+    media: [{type:"image", url:"https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80"}],
+    likes: 118, liked: false, bookmarked: false, tag: "📷 Photo"
+  },
+  {
+    id: 3, user: "Jordan Lee", initials: "JL", avatarGrad: "linear-gradient(135deg,#c86bff,#6b8eff)",
+    time: "1d ago", text: "Hot take: the best productivity tool is just a blank document and a timer. No apps, no systems. Just you and the work.",
+    media: [], likes: 294, liked: false, bookmarked: false, tag: "💡 Ideas"
+  }
+];
+posts = [...seedPosts];
+renderPosts();
+
+// ── MODALS ──
+function openModal(type) {
+  closeModals();
+  document.getElementById(type + 'Overlay').classList.add('active');
+}
+function closeModals() {
+  document.querySelectorAll('.overlay').forEach(o => o.classList.remove('active'));
+}
+document.querySelectorAll('.overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) closeModals(); });
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModals(); });
+
+// ── AUTH ──
+function doSignIn() {
+  const email = document.getElementById('signinEmail').value.trim();
+  if (!email) { alert('Please enter your email.'); return; }
+  const name = email.split('@')[0].replace(/[._]/g,' ').replace(/\b\w/g, c=>c.toUpperCase());
+  signIn({name, email});
+}
+function doSignUp() {
+  const name = document.getElementById('signupName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  if (!name || !email) { alert('Please fill in all fields.'); return; }
+  signIn({name, email});
+}
+function signIn(user) {
+  currentUser = user;
+  closeModals();
+  updateNav();
+  document.getElementById('signinGate').style.display = 'none';
+  document.getElementById('composer').style.display = 'block';
+  const initials = user.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('compAvatar').textContent = initials;
+}
+function signOut() {
+  currentUser = null;
+  mediaFiles = [];
+  document.getElementById('mediaPreview').innerHTML = '';
+  document.getElementById('postText').value = '';
+  updateCounter();
+  updateNav();
+  document.getElementById('signinGate').style.display = 'block';
+  document.getElementById('composer').style.display = 'none';
+}
+function updateNav() {
+  const navRight = document.getElementById('navRight');
+  if (currentUser) {
+    const initials = currentUser.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+    navRight.innerHTML = `
+      <div class="user-chip">
+        <div class="avatar">${initials}</div>
+        ${currentUser.name.split(' ')[0]}
+      </div>
+      <button class="btn btn-danger" onclick="signOut()">Sign Out</button>
+    `;
+  } else {
+    navRight.innerHTML = `
+      <button class="btn btn-ghost" onclick="openModal('signin')">Sign In</button>
+      <button class="btn btn-primary" onclick="openModal('signup')">Join Free</button>
+    `;
+  }
+}
+
+// ── COMPOSER ──
+function updateCounter() {
+  const len = document.getElementById('postText').value.length;
+  const remaining = 280 - len;
+  const el = document.getElementById('charCounter');
+  el.textContent = remaining;
+  el.style.color = remaining < 20 ? '#ff6b6b' : 'var(--muted)';
+  document.getElementById('postBtn').disabled = (len === 0 && mediaFiles.length === 0);
+}
+
+function handleFiles(input, type) {
+  Array.from(input.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      mediaFiles.push({type, url: e.target.result, name: file.name});
+      renderPreview();
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+}
+
+function renderPreview() {
+  const container = document.getElementById('mediaPreview');
+  container.innerHTML = mediaFiles.map((f, i) => {
+    if (f.type === 'image') {
+      return `<div class="preview-item"><img src="${f.url}" alt=""/><button class="remove-btn" onclick="removeMedia(${i})">✕</button></div>`;
+    } else if (f.type === 'video') {
+      return `<div class="preview-item"><video src="${f.url}" muted></video><button class="remove-btn" onclick="removeMedia(${i})">✕</button></div>`;
+    } else {
+      return `<div class="preview-item" style="padding:10px 14px;font-size:.8rem;color:var(--muted)">📎 ${f.name}<button class="remove-btn" onclick="removeMedia(${i})">✕</button></div>`;
+    }
+  }).join('');
+  document.getElementById('postBtn').disabled = (document.getElementById('postText').value.length === 0 && mediaFiles.length === 0);
+}
+
+function removeMedia(i) {
+  mediaFiles.splice(i, 1);
+  renderPreview();
+}
+
+const emojis = ['✨','🔥','💡','🎉','🚀','💬','📷','🎨','🎵','🤔'];
+let emojiIdx = 0;
+function addEmoji() {
+  const ta = document.getElementById('postText');
+  ta.value += emojis[emojiIdx++ % emojis.length];
+  updateCounter();
+}
+
+function submitPost() {
+  const text = document.getElementById('postText').value.trim();
+  if (!text && mediaFiles.length === 0) return;
+  const initials = currentUser.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+  const newPost = {
+    id: Date.now(),
+    user: currentUser.name,
+    initials,
+    avatarGrad: "linear-gradient(135deg,var(--accent),var(--accent3))",
+    time: "just now",
+    text,
+    media: [...mediaFiles],
+    likes: 0, liked: false, bookmarked: false, tag: "✍️ Post"
+  };
+  posts.unshift(newPost);
+  mediaFiles = [];
+  document.getElementById('postText').value = '';
+  document.getElementById('mediaPreview').innerHTML = '';
+  updateCounter();
+  renderPosts();
+}
+
+// ── POSTS ──
+function renderPosts() {
+  const container = document.getElementById('postsContainer');
+  container.innerHTML = posts.map(p => `
+    <div class="post-card" id="post-${p.id}">
+      <div class="post-header">
+        <div class="post-avatar" style="background:${p.avatarGrad}">${p.initials}</div>
+        <div class="post-meta">
+          <div class="post-name">${p.user}</div>
+          <div class="post-time">${p.time}</div>
+        </div>
+        <div class="post-tag">${p.tag}</div>
+      </div>
+      ${p.text ? `<div class="post-body">${p.text}</div>` : ''}
+      ${p.media.length ? `
+        <div class="post-media">
+          ${p.media.map(m => m.type === 'image'
+            ? `<img src="${m.url}" alt=""/>`
+            : m.type === 'video'
+            ? `<video src="${m.url}" controls></video>`
+            : `<div style="padding:8px 12px;background:var(--surface2);border-radius:8px;font-size:.8rem;color:var(--muted)">📎 ${m.name}</div>`
+          ).join('')}
+        </div>
+      ` : ''}
+      <div class="post-actions">
+        <button class="action-btn ${p.liked ? 'liked' : ''}" onclick="toggleLike(${p.id})">
+          ${p.liked ? '❤️' : '🤍'} ${p.likes}
+        </button>
+        <button class="action-btn" onclick="replyPrompt(${p.id})">💬 Reply</button>
+        <button class="action-btn" onclick="sharePost(${p.id})">🔁 Share</button>
+        <button class="action-btn ${p.bookmarked ? 'bookmarked' : ''}" onclick="toggleBookmark(${p.id})">
+          ${p.bookmarked ? '🔖' : '🏷️'} Save
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleLike(id) {
+  const p = posts.find(x => x.id === id);
+  if (!p) return;
+  if (!currentUser) { openModal('signin'); return; }
+  p.liked = !p.liked;
+  p.likes += p.liked ? 1 : -1;
+  renderPosts();
+}
+function toggleBookmark(id) {
+  const p = posts.find(x => x.id === id);
+  if (!p) return;
+  if (!currentUser) { openModal('signin'); return; }
+  p.bookmarked = !p.bookmarked;
+  renderPosts();
+}
+function replyPrompt(id) {
+  if (!currentUser) { openModal('signin'); return; }
+  document.getElementById('postText').focus();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+function sharePost(id) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(window.location.href + '#post-' + id);
+  }
+  const btn = event.target;
+  btn.textContent = '✅ Copied!';
+  setTimeout(() => btn.textContent = '🔁 Share', 1500);
+}
+
+// init counter
+updateCounter();
+</script>
+</body>
+</html>
