@@ -6,12 +6,11 @@
   <title>Pulse — Share Your World</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
   <style>
-    *, *::before, *::after { 
-      box-sizing: border-box; 
-      margin: 0; 
-      padding: 0; 
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
-
     :root {
       --bg: #0d0d0f;
       --surface: #16161a;
@@ -26,7 +25,6 @@
       --font-head: 'Syne', sans-serif;
       --font-body: 'DM Sans', sans-serif;
     }
-
     body {
       background: var(--bg);
       color: var(--text);
@@ -34,8 +32,7 @@
       min-height: 100vh;
       overflow-x: hidden;
     }
-
-    /* Noise Overlay - FIXED z-index */
+    /* Noise Overlay */
     body::before {
       content: '';
       position: fixed;
@@ -45,7 +42,6 @@
       z-index: -1;
       opacity: 0.4;
     }
-
     /* NAV */
     nav {
       display: flex;
@@ -59,7 +55,6 @@
       backdrop-filter: blur(16px);
       z-index: 100;
     }
-
     .logo {
       font-family: var(--font-head);
       font-weight: 800;
@@ -68,13 +63,11 @@
       color: var(--accent);
     }
     .logo span { color: var(--text); }
-
-    .nav-right { 
-      display: flex; 
-      align-items: center; 
-      gap: 12px; 
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
-
     .btn {
       font-family: var(--font-body);
       font-weight: 500;
@@ -85,40 +78,36 @@
       cursor: pointer;
       transition: all 0.2s ease;
     }
-
     .btn-ghost {
       background: transparent;
       color: var(--muted);
       border: 1px solid var(--border);
     }
-    .btn-ghost:hover { 
-      color: var(--text); 
-      border-color: var(--muted); 
+    .btn-ghost:hover {
+      color: var(--text);
+      border-color: var(--muted);
     }
-
     .btn-primary {
       background: var(--accent);
       color: #0d0d0f;
       font-weight: 700;
     }
-    .btn-primary:hover { 
-      background: #d4e93e; 
-      transform: translateY(-1px); 
+    .btn-primary:hover {
+      background: #d4e93e;
+      transform: translateY(-1px);
     }
-
     .btn-danger {
       background: transparent;
       color: var(--accent2);
       border: 1px solid var(--accent2);
     }
-    .btn-danger:hover { 
-      background: var(--accent2); 
-      color: #fff; 
+    .btn-danger:hover {
+      background: var(--accent2);
+      color: #fff;
     }
-
     .user-chip {
-      display: flex; 
-      align-items: center; 
+      display: flex;
+      align-items: center;
       gap: 8px;
       background: var(--surface2);
       border: 1px solid var(--border);
@@ -126,20 +115,18 @@
       padding: 6px 14px 6px 6px;
       font-size: 0.85rem;
     }
-
     .avatar {
-      width: 28px; 
-      height: 28px; 
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       background: linear-gradient(135deg, var(--accent), var(--accent3));
-      display: flex; 
-      align-items: center; 
+      display: flex;
+      align-items: center;
       justify-content: center;
-      font-weight: 700; 
-      font-size: 0.75rem; 
+      font-weight: 700;
+      font-size: 0.75rem;
       color: #0d0d0f;
     }
-
     /* MODALS */
     .overlay {
       display: none;
@@ -152,7 +139,6 @@
       justify-content: center;
     }
     .overlay.active { display: flex; }
-
     .modal {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -162,34 +148,29 @@
       max-width: 420px;
       animation: slideUp 0.3s ease;
     }
-
     @keyframes slideUp {
       from { opacity: 0; transform: translateY(30px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
     .modal h2 {
       font-family: var(--font-head);
       font-size: 1.6rem;
       font-weight: 800;
       margin-bottom: 8px;
     }
-
-    .modal p { 
-      color: var(--muted); 
-      margin-bottom: 28px; 
+    .modal p {
+      color: var(--muted);
+      margin-bottom: 28px;
     }
-
     .field { margin-bottom: 18px; }
-    .field label { 
-      display: block; 
-      font-size: 0.8rem; 
-      color: var(--muted); 
-      margin-bottom: 6px; 
-      text-transform: uppercase; 
+    .field label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
       letter-spacing: 0.06em;
     }
-
     .field input {
       width: 100%;
       background: var(--surface2);
@@ -200,49 +181,28 @@
       font-size: 0.95rem;
       outline: none;
     }
-    .field input:focus { 
-      border-color: var(--accent); 
+    .field input:focus {
+      border-color: var(--accent);
     }
-
-    .modal-actions { 
-      display: flex; 
-      gap: 10px; 
-      justify-content: flex-end; 
-      margin-top: 12px; 
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 12px;
     }
-
     /* LAYOUT */
     .page {
       display: flex;
-      max-width: 1100px;
+      max-width: 720px; /* Narrower and more centered now that sidebar is gone */
       margin: 0 auto;
       padding: 32px 24px;
       gap: 32px;
     }
-
-    .sidebar { width: 220px; flex-shrink: 0; }
-
-    .sidebar-nav a {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 11px 14px;
-      border-radius: 12px;
-      color: var(--muted);
-      text-decoration: none;
-      font-size: 0.9rem;
-      font-weight: 500;
-      margin-bottom: 4px;
-      transition: all 0.15s;
+    .feed { 
+      flex: 1; 
+      min-width: 0; 
+      width: 100%;
     }
-    .sidebar-nav a:hover,
-    .sidebar-nav a.active {
-      background: var(--surface2);
-      color: var(--text);
-    }
-
-    .feed { flex: 1; min-width: 0; }
-
     /* Composer */
     .composer {
       background: var(--surface);
@@ -251,27 +211,24 @@
       padding: 20px;
       margin-bottom: 24px;
     }
-
     .composer-top {
       display: flex;
       gap: 14px;
       align-items: flex-start;
     }
-
     .composer-avatar {
-      width: 40px; 
-      height: 40px; 
-      border-radius: 50%; 
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
       flex-shrink: 0;
       background: linear-gradient(135deg, var(--accent), var(--accent3));
-      display: flex; 
-      align-items: center; 
+      display: flex;
+      align-items: center;
       justify-content: center;
-      font-weight: 700; 
-      font-size: 0.85rem; 
+      font-weight: 700;
+      font-size: 0.85rem;
       color: #0d0d0f;
     }
-
     .composer textarea {
       flex: 1;
       background: transparent;
@@ -283,7 +240,6 @@
       line-height: 1.6;
       min-height: 72px;
     }
-
     .composer-footer {
       display: flex;
       align-items: center;
@@ -294,7 +250,6 @@
       flex-wrap: wrap;
       gap: 10px;
     }
-
     /* Post Card */
     .post-card {
       background: var(--surface);
@@ -303,33 +258,29 @@
       padding: 20px;
       margin-bottom: 16px;
     }
-
     .post-header {
       display: flex;
       align-items: center;
       gap: 12px;
       margin-bottom: 14px;
     }
-
     .post-avatar {
-      width: 38px; 
-      height: 38px; 
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
       background: linear-gradient(135deg, #ff6b6b, #ffc06b);
-      display: flex; 
-      align-items: center; 
+      display: flex;
+      align-items: center;
       justify-content: center;
-      font-weight: 700; 
-      font-size: 0.8rem; 
+      font-weight: 700;
+      font-size: 0.8rem;
       color: #0d0d0f;
     }
-
     /* Trending */
     .trending-panel {
-      width: 240px; 
+      width: 240px;
       flex-shrink: 0;
     }
-
     .panel-card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -337,21 +288,18 @@
       padding: 18px;
       margin-bottom: 16px;
     }
-
     /* Responsive */
     @media (max-width: 900px) {
       .trending-panel { display: none; }
+      .page { max-width: 680px; }
     }
-
     @media (max-width: 640px) {
-      .sidebar { display: none; }
       nav { padding: 14px 18px; }
       .page { padding: 20px 14px; gap: 20px; }
     }
   </style>
 </head>
 <body>
-
 <!-- NAV -->
 <nav>
   <div class="logo">pulse<span>.</span></div>
@@ -392,19 +340,7 @@
 
 <!-- MAIN CONTENT -->
 <div class="page">
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <nav class="sidebar-nav">
-      <a href="#" class="active"><span class="icon">⚡</span> Feed</a>
-      <a href="#"><span class="icon">🔍</span> Explore</a>
-      <a href="#"><span class="icon">🔔</span> Notifications</a>
-      <a href="#"><span class="icon">📬</span> Messages</a>
-      <a href="#"><span class="icon">🔖</span> Saved</a>
-      <a href="#"><span class="icon">👤</span> Profile</a>
-    </nav>
-  </aside>
-
-  <!-- FEED -->
+  <!-- FEED (now wider and centered) -->
   <main class="feed">
     <!-- Sign-in Gate -->
     <div class="signin-gate" id="signinGate" style="background:var(--surface); border:1px dashed var(--border); border-radius:var(--radius); padding:24px; text-align:center; margin-bottom:24px;">
@@ -442,7 +378,7 @@
     <div id="postsContainer"></div>
   </main>
 
-  <!-- TRENDING -->
+  <!-- TRENDING (kept for now - let me know if you want this removed too) -->
   <aside class="trending-panel">
     <div class="panel-card">
       <div style="font-family:var(--font-head);font-weight:700;font-size:0.9rem;margin-bottom:14px;color:var(--text);">🔥 Trending</div>
@@ -450,7 +386,6 @@
         <div style="font-size:0.85rem;font-weight:600;color:var(--accent);">#WebDev</div>
         <div style="font-size:0.75rem;color:var(--muted);">4,821 posts</div>
       </div>
-      <!-- More trends... (shortened for brevity) -->
     </div>
   </aside>
 </div>
@@ -460,12 +395,10 @@
 let currentUser = null;
 let posts = [];
 let mediaFiles = [];
-
 const seedPosts = [
   { id: 1, user: "Alex Rivera", initials: "AR", avatarGrad: "linear-gradient(135deg,#6bffce,#6b8eff)", time: "2h ago", text: "Just shipped a new feature 🚀 The dark mode toggle now respects your system preference automatically.", media: [], likes: 42, liked: false, bookmarked: false, tag: "🛠 Dev" },
   { id: 2, user: "Priya Nair", initials: "PN", avatarGrad: "linear-gradient(135deg,#ff6b6b,#ffc06b)", time: "5h ago", text: "Morning fog over the harbor. Sometimes the city feels completely different before 7am.", media: [{type:"image", url:"https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80"}], likes: 118, liked: false, bookmarked: false, tag: "📷 Photo" }
 ];
-
 posts = [...seedPosts];
 renderPosts();
 
